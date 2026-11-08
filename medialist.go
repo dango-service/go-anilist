@@ -17,25 +17,27 @@ const (
 	MediaListStatusRepeating MediaListStatus = "REPEATING"
 )
 
-// MediaListEntry represents the status and progress of an anime in a user's list.
+// MediaListEntry represents the status and progress of an anime or manga in a user's list.
 type MediaListEntry struct {
-	ID        int             `json:"id"`
-	MediaID   int             `json:"mediaId"`
-	Status    MediaListStatus `json:"status"`
-	Progress  int             `json:"progress"`
-	Score     float64         `json:"score"`
-	Repeat    int             `json:"repeat"`
-	UpdatedAt int64           `json:"updatedAt"`
-	Media     *Media          `json:"media,omitempty"`
+	ID              int             `json:"id"`
+	MediaID         int             `json:"mediaId"`
+	Status          MediaListStatus `json:"status"`
+	Progress        int             `json:"progress"`
+	ProgressVolumes int             `json:"progressVolumes,omitempty"`
+	Score           float64         `json:"score"`
+	Repeat          int             `json:"repeat"`
+	UpdatedAt       int64           `json:"updatedAt"`
+	Media           *Media          `json:"media,omitempty"`
 }
 
 // SaveMediaListEntryInput provides parameters for updating or creating a list entry.
 type SaveMediaListEntryInput struct {
-	MediaID  int              `json:"mediaId"`
-	Status   *MediaListStatus `json:"status,omitempty"`
-	Progress *int             `json:"progress,omitempty"`
-	Score    *float64         `json:"score,omitempty"`
-	Repeat   *int             `json:"repeat,omitempty"`
+	MediaID         int              `json:"mediaId"`
+	Status          *MediaListStatus `json:"status,omitempty"`
+	Progress        *int             `json:"progress,omitempty"`
+	ProgressVolumes *int             `json:"progressVolumes,omitempty"`
+	Score           *float64         `json:"score,omitempty"`
+	Repeat          *int             `json:"repeat,omitempty"`
 }
 
 type collectionParams struct {
@@ -113,12 +115,13 @@ const getMediaListCollectionQuery = `query ($userId: Int, $status: MediaListStat
   }
 }`
 
-const saveMediaListEntryMutation = `mutation ($mediaId: Int, $status: MediaListStatus, $progress: Int, $score: Float, $repeat: Int) {
-  SaveMediaListEntry(mediaId: $mediaId, status: $status, progress: $progress, score: $score, repeat: $repeat) {
+const saveMediaListEntryMutation = `mutation ($mediaId: Int, $status: MediaListStatus, $progress: Int, $progressVolumes: Int, $score: Float, $repeat: Int) {
+  SaveMediaListEntry(mediaId: $mediaId, status: $status, progress: $progress, progressVolumes: $progressVolumes, score: $score, repeat: $repeat) {
     id
     mediaId
     status
     progress
+    progressVolumes
     score
     repeat
     updatedAt
@@ -201,6 +204,9 @@ func (s *MediaListService) SaveEntry(ctx context.Context, input SaveMediaListEnt
 	}
 	if input.Progress != nil {
 		vars["progress"] = *input.Progress
+	}
+	if input.ProgressVolumes != nil {
+		vars["progressVolumes"] = *input.ProgressVolumes
 	}
 	if input.Score != nil {
 		vars["score"] = *input.Score

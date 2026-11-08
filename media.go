@@ -52,6 +52,8 @@ type Media struct {
 	Format     MediaFormat `json:"format"`
 	Status     MediaStatus `json:"status"`
 	Episodes   *int        `json:"episodes,omitempty"`
+	Chapters   *int        `json:"chapters,omitempty"`
+	Volumes    *int        `json:"volumes,omitempty"`
 	Duration   *int        `json:"duration,omitempty"`
 	Synonyms   []string    `json:"synonyms"`
 	SeasonYear *int        `json:"seasonYear,omitempty"`
@@ -68,22 +70,24 @@ const mediaFieldsFragment = `
   format
   status
   episodes
+  chapters
+  volumes
   duration
   synonyms
   seasonYear
 `
 
 const getMediaByIDQuery = `query ($id: Int) {
-  Media(id: $id, type: ANIME) {` + mediaFieldsFragment + `}
+  Media(id: $id) {` + mediaFieldsFragment + `}
 }`
 
 const getMediaByIDMalQuery = `query ($idMal: Int) {
-  Media(idMal: $idMal, type: ANIME) {` + mediaFieldsFragment + `}
+  Media(idMal: $idMal) {` + mediaFieldsFragment + `}
 }`
 
-const searchMediaQuery = `query ($search: String, $format: MediaFormat, $seasonYear: Int, $perPage: Int) {
+const searchMediaQuery = `query ($search: String, $type: MediaType, $format: MediaFormat, $seasonYear: Int, $perPage: Int) {
   Page(page: 1, perPage: $perPage) {
-    media(search: $search, format: $format, seasonYear: $seasonYear, type: ANIME) {` + mediaFieldsFragment + `}
+    media(search: $search, type: $type, format: $format, seasonYear: $seasonYear) {` + mediaFieldsFragment + `}
   }
 }`
 
@@ -147,6 +151,9 @@ func (s *MediaService) Search(ctx context.Context, query string, opts ...SearchO
 	vars := map[string]interface{}{
 		"search":  query,
 		"perPage": params.limit,
+	}
+	if params.mediaType != "" {
+		vars["type"] = params.mediaType
 	}
 	if params.format != "" {
 		vars["format"] = params.format

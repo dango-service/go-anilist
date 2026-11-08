@@ -1,6 +1,7 @@
 package anilist
 
 type searchParams struct {
+	mediaType  MediaType
 	format     MediaFormat
 	seasonYear int
 	limit      int
@@ -8,6 +9,13 @@ type searchParams struct {
 
 // SearchOption configures parameters for MediaService.Search.
 type SearchOption func(*searchParams)
+
+// WithType filters search results by media type (ANIME or MANGA).
+func WithType(t MediaType) SearchOption {
+	return func(p *searchParams) {
+		p.mediaType = t
+	}
+}
 
 // WithFormat filters search results by media format (TV, Movie, OVA, etc.).
 func WithFormat(f MediaFormat) SearchOption {
