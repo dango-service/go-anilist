@@ -2,7 +2,6 @@ package anilist
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -45,16 +44,12 @@ func TestAuthService_ExchangeCode(t *testing.T) {
 			t.Errorf("Method = %q, want POST", r.Method)
 		}
 
-		var req tokenExchangeRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			t.Fatalf("failed to decode request: %v", err)
+		_ = r.ParseForm()
+		if r.Form.Get("grant_type") != "authorization_code" {
+			t.Errorf("GrantType = %q, want authorization_code", r.Form.Get("grant_type"))
 		}
-
-		if req.GrantType != "authorization_code" {
-			t.Errorf("GrantType = %q, want authorization_code", req.GrantType)
-		}
-		if req.Code != "authcode123" {
-			t.Errorf("Code = %q, want authcode123", req.Code)
+		if r.Form.Get("code") != "authcode123" {
+			t.Errorf("Code = %q, want authcode123", r.Form.Get("code"))
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -100,14 +95,13 @@ func TestAuthService_ExchangeCode(t *testing.T) {
 
 func TestAuthService_RefreshToken(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var req tokenExchangeRequest
-		_ = json.NewDecoder(r.Body).Decode(&req)
+		_ = r.ParseForm()
 
-		if req.GrantType != "refresh_token" {
-			t.Errorf("GrantType = %q, want refresh_token", req.GrantType)
+		if r.Form.Get("grant_type") != "refresh_token" {
+			t.Errorf("GrantType = %q, want refresh_token", r.Form.Get("grant_type"))
 		}
-		if req.RefreshToken != "old-refresh-token" {
-			t.Errorf("RefreshToken = %q, want old-refresh-token", req.RefreshToken)
+		if r.Form.Get("refresh_token") != "old-refresh-token" {
+			t.Errorf("RefreshToken = %q, want old-refresh-token", r.Form.Get("refresh_token"))
 		}
 
 		w.Header().Set("Content-Type", "application/json")

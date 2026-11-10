@@ -1,7 +1,6 @@
 package anilist
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -9,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -109,17 +109,27 @@ func (s *AuthService) doTokenRequest(ctx context.Context, payload tokenExchangeR
 		tokenURL = DefaultTokenURL
 	}
 
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(payload); err != nil {
-		return nil, fmt.Errorf("anilist: encode token request: %w", err)
+	form := url.Values{}
+	form.Set("grant_type", payload.GrantType)
+	form.Set("client_id", payload.ClientID)
+	form.Set("client_secret", payload.ClientSecret)
+	if payload.RedirectURI != "" {
+		form.Set("redirect_uri", payload.RedirectURI)
+	}
+	if payload.Code != "" {
+		form.Set("code", payload.Code)
+	}
+	if payload.RefreshToken != "" {
+		form.Set("refresh_token", payload.RefreshToken)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, &buf)
+	body := strings.NewReader(form.Encode())
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, body)
 	if err != nil {
 		return nil, fmt.Errorf("anilist: create token request: %w", err)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 	if s.client.userAgent != "" {
 		req.Header.Set("User-Agent", s.client.userAgent)
