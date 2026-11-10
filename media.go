@@ -44,19 +44,28 @@ type MediaTitle struct {
 	Native  *string `json:"native,omitempty"`
 }
 
+// MediaCoverImage represents the official cover artwork URLs for a media item.
+type MediaCoverImage struct {
+	ExtraLarge *string `json:"extraLarge,omitempty"`
+	Large      *string `json:"large,omitempty"`
+	Medium     *string `json:"medium,omitempty"`
+	Color      *string `json:"color,omitempty"`
+}
+
 // Media represents an anime or manga entry in AniList.
 type Media struct {
-	ID         int         `json:"id"`
-	IDMal      *int        `json:"idMal,omitempty"`
-	Title      MediaTitle  `json:"title"`
-	Format     MediaFormat `json:"format"`
-	Status     MediaStatus `json:"status"`
-	Episodes   *int        `json:"episodes,omitempty"`
-	Chapters   *int        `json:"chapters,omitempty"`
-	Volumes    *int        `json:"volumes,omitempty"`
-	Duration   *int        `json:"duration,omitempty"`
-	Synonyms   []string    `json:"synonyms"`
-	SeasonYear *int        `json:"seasonYear,omitempty"`
+	ID         int              `json:"id"`
+	IDMal      *int             `json:"idMal,omitempty"`
+	Title      MediaTitle       `json:"title"`
+	Format     MediaFormat      `json:"format"`
+	Status     MediaStatus      `json:"status"`
+	Episodes   *int             `json:"episodes,omitempty"`
+	Chapters   *int             `json:"chapters,omitempty"`
+	Volumes    *int             `json:"volumes,omitempty"`
+	Duration   *int             `json:"duration,omitempty"`
+	Synonyms   []string         `json:"synonyms"`
+	SeasonYear *int             `json:"seasonYear,omitempty"`
+	CoverImage *MediaCoverImage `json:"coverImage,omitempty"`
 }
 
 const mediaFieldsFragment = `
@@ -75,6 +84,12 @@ const mediaFieldsFragment = `
   duration
   synonyms
   seasonYear
+  coverImage {
+    extraLarge
+    large
+    medium
+    color
+  }
 `
 
 const getMediaByIDQuery = `query ($id: Int) {
