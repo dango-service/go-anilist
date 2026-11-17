@@ -55,11 +55,12 @@ func WithStatus(status MediaListStatus) CollectionOption {
 }
 
 const getMediaListEntryQuery = `query ($userId: Int, $mediaId: Int) {
-  MediaList(userId: $userId, mediaId: $mediaId, type: ANIME) {
+  MediaList(userId: $userId, mediaId: $mediaId) {
     id
     mediaId
     status
     progress
+    progressVolumes
     score
     repeat
     updatedAt
@@ -134,8 +135,8 @@ const deleteMediaListEntryMutation = `mutation ($id: Int) {
   }
 }`
 
-// GetEntry retrieves the list entry for a specific user and anime.
-// Returns ErrNotFound if the anime is not in the user's list.
+// GetEntry retrieves an anime or manga list entry for a user and media ID.
+// Returns ErrNotFound if the media is not in the user's list.
 func (s *MediaListService) GetEntry(ctx context.Context, userID, mediaID int) (*MediaListEntry, *Response, error) {
 	var data struct {
 		MediaList *MediaListEntry `json:"MediaList"`
